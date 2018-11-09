@@ -1,0 +1,81 @@
+from astropy.io import fits
+import os
+import numpy as np
+import re
+import collections
+basepath = r"/run/media/hutsh/Seagate Expansion Drive/NICER/NEW/Download/2017_09_download/FTP/nicer/data/obs/2017_09/"
+textpath = r"./text/"
+
+def save_id_list():
+    idlist = []
+    with open('uf_pkg_list.txt', 'r') as pathlist:
+        for path in pathlist:
+            path = path.strip()
+            id = re.search(r'ni\d\d\d\d\d\d\d\d\d\d', path)[0]
+            id = id[2:]
+            idlist.append(id)
+
+    idlist = list(set(idlist))
+    idlist.sort()
+    with open('idlist.txt', 'w') as out:
+        for i in idlist:
+            out.write(str(i) + '\n')
+
+def save_time_in_txt(fitsFilePath):
+    filename = os.path.basename(fitsFilePath)
+    hdul = fits.open(fitsFilePath)
+    time = hdul[1].data['TIME']
+
+    del hdul
+    np.savetxt("text/" + filename + ".txt", time, delimiter="\n")
+
+def one_id_find_same_time(id): ##main
+    path0 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu0_uf.evt.gz"
+    path1 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu1_uf.evt.gz"
+    path2 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu2_uf.evt.gz"
+    path3 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu3_uf.evt.gz"
+    path4 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu4_uf.evt.gz"
+    path5 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu5_uf.evt.gz"
+    path6 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu6_uf.evt.gz"
+
+    pathlist = [path0, path1, path2, path3, path4, path5, path6]
+    for i in pathlist:
+        save_time_in_txt(i)
+
+def combine_same_id_text(id):
+    command = "cat " + textpath + "*" + id + "*.txt > " + textpath + id + ".txt"
+    os.system(command)
+    os.system("rm " + textpath + "*" + id + "*.gz.txt")
+
+def save_id_fists_to_one_text(id):
+    path0 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu0_uf.evt.gz"
+    path1 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu1_uf.evt.gz"
+    path2 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu2_uf.evt.gz"
+    path3 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu3_uf.evt.gz"
+    path4 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu4_uf.evt.gz"
+    path5 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu5_uf.evt.gz"
+    path6 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu6_uf.evt.gz"
+
+    pathlist = [path0, path1, path2, path3, path4, path5, path6]
+    for i in pathlist:
+        save_time_in_txt(i)
+
+    combine_same_id_text(id)
+
+
+def run():
+    with open('uf_pkg_list.txt', 'r') as pathlist:
+        for path in pathlist:
+            path = path.strip()
+            filename = os.path.basename(path)
+            hdul = fits.open(path)
+            time = hdul[1].data['TIME']
+            del hdul
+            print("saving file, ", filename)
+            np.savetxt("combined/" + filename + ".txt", time, delimiter="\n")
+
+
+
+if __name__ == '__main__':
+    id = '1010010112'
+    save_id_fists_to_one_text(id)
