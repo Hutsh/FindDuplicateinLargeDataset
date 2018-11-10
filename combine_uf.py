@@ -25,9 +25,18 @@ def save_time_in_txt(fitsFilePath):
     filename = os.path.basename(fitsFilePath)
     hdul = fits.open(fitsFilePath)
     time = hdul[1].data['TIME']
+    rawx = hdul[1].data['RAWX']
+    rawy = hdul[1].data['RAWY']
+
+    cated = np.column_stack((time.astype(np.object), rawx, rawy))
 
     del hdul
-    np.savetxt("text/" + filename + ".txt", time, delimiter="\n")
+    del time
+    del rawx
+    del rawy
+
+    # np.savetxt("text/" + filename + ".txt", cated)
+    np.savetxt("text/" + filename + ".txt", cated, fmt='%.14e %d%d') #分辨率40ns 但是数据只到小数点后6位（116736489.906023）
 
 def one_id_find_same_time(id): ##main
     path0 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu0_uf.evt.gz"
@@ -64,18 +73,14 @@ def save_id_fists_to_one_text(id):
 
 
 def run():
-    with open('uf_pkg_list.txt', 'r') as pathlist:
-        for path in pathlist:
-            path = path.strip()
-            filename = os.path.basename(path)
-            hdul = fits.open(path)
-            time = hdul[1].data['TIME']
-            del hdul
-            print("saving file, ", filename)
-            np.savetxt("combined/" + filename + ".txt", time, delimiter="\n")
+    with open('idlist.txt', 'r') as idlist:
+        for id in idlist:
+            id = id.strip()
+            save_id_fists_to_one_text(id)
 
 
 
 if __name__ == '__main__':
     id = '1010010112'
     save_id_fists_to_one_text(id)
+    # run()
