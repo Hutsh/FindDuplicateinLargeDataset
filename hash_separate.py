@@ -42,7 +42,7 @@ def start_sep(idn, npart):
             line = line[2:16] +'\n'
             k = int(line) % npart # "1.16736489906023e+08 7 5"   
             fv[k].append(line)
-            if len(fv[k]) >= int(npart/100)*100:      # 如果一个键值长度超过1000，则写入文件
+            if len(fv[k]) >= int(npart/100):      # 如果一个键值长度超过1000，则写入文件
                 q.put((task, (fd[k], fv[k].copy(), lock)))
                 fv[k].clear()
     q.join()
@@ -51,7 +51,8 @@ def start_sep(idn, npart):
         f.writelines(fv[k])
     for i in range(npart):
         fd[i].close()
-    print(time.time() - start)
+
+    print("\tSeparate " + str(idn) + ".txt in ", time.time() - start, "s")
 
 
 

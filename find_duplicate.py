@@ -1,8 +1,6 @@
 from collections import Counter
-import time
 import multiprocessing as mp
-import glob 
-import re
+import glob, re, os, time
 from collections import defaultdict
 
 
@@ -44,7 +42,7 @@ def start_find_dup():
     for r in res:
         d.extend(r.get())
     # print(Counter(dict(d)).most_common(10))
-    print(time.time() - t)
+    print("\tFinish finding duplicates in", time.time() - t, "s")
     return d
 
 def get_dup_time_list():
@@ -71,17 +69,26 @@ def get_dup_info():
         td[time].append(p)
         # print("t:",time, " p:",p)
 
+    # print(td)
+    return td
+
+def save_result(dictionary):
+    if not os.path.exists('result'):
+        os.mkdir('result')
 
 
+    idn = os.path.basename(glob.glob("./text/*.txt")[0]).strip('.txt')
 
-
-    print(td)
-
+    with open("./result/"+idn+"_result.txt", 'w') as out:
+        for k,v in dictionary.items():
+            line = str(k) + "\t" + str(v) + '\n'
+            out.write(line)
 
 
 
 if __name__ == '__main__':
     ut = get_dup_info()
-    print(ut)
+    save_result(ut)
+
 
 

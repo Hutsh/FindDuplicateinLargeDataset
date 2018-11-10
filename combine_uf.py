@@ -1,7 +1,7 @@
 from astropy.io import fits
 import os
 import numpy as np
-import re
+import re,time
 import collections
 basepath = r"/run/media/hutsh/Seagate Expansion Drive/NICER/NEW/Download/2017_09_download/FTP/nicer/data/obs/2017_09/"
 textpath = r"./text/"
@@ -57,6 +57,9 @@ def combine_same_id_text(id):
     os.system("rm " + textpath + "*" + id + "*.gz.txt")
 
 def save_id_fists_to_one_text(id):
+
+    start = time.time()
+
     path0 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu0_uf.evt.gz"
     path1 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu1_uf.evt.gz"
     path2 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu2_uf.evt.gz"
@@ -70,6 +73,8 @@ def save_id_fists_to_one_text(id):
         save_time_in_txt(i)
 
     combine_same_id_text(id)
+
+    print("\tFinish save fits "+str(id) +" to txt in ", time.time()-start, "s")
 
 
 def run():
