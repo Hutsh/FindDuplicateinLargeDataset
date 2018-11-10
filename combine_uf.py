@@ -3,8 +3,10 @@ import os
 import numpy as np
 import re,time
 import collections
-basepath = r"/run/media/hutsh/Seagate Expansion Drive/NICER/NEW/Download/2017_09_download/FTP/nicer/data/obs/2017_09/"
-textpath = r"./text/"
+from config import *
+
+basepath = config_basepath
+textpath = config_textpath
 
 def save_id_list():
     idlist = []
@@ -39,13 +41,13 @@ def save_time_in_txt(fitsFilePath):
     np.savetxt("text/" + filename + ".txt", cated, fmt='%.14e %d%d') #分辨率40ns 但是数据只到小数点后6位（116736489.906023）
 
 def one_id_find_same_time(id): ##main
-    path0 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu0_uf.evt.gz"
-    path1 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu1_uf.evt.gz"
-    path2 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu2_uf.evt.gz"
-    path3 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu3_uf.evt.gz"
-    path4 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu4_uf.evt.gz"
-    path5 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu5_uf.evt.gz"
-    path6 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu6_uf.evt.gz"
+    path0 = basepath + id + config_filenamePart0 + id + config_filenamePart1_0
+    path1 = basepath + id + config_filenamePart0 + id + config_filenamePart1_1
+    path2 = basepath + id + config_filenamePart0 + id + config_filenamePart1_2
+    path3 = basepath + id + config_filenamePart0 + id + config_filenamePart1_3
+    path4 = basepath + id + config_filenamePart0 + id + config_filenamePart1_4
+    path5 = basepath + id + config_filenamePart0 + id + config_filenamePart1_5
+    path6 = basepath + id + config_filenamePart0 + id + config_filenamePart1_6
 
     pathlist = [path0, path1, path2, path3, path4, path5, path6]
     for i in pathlist:
@@ -60,13 +62,13 @@ def save_id_fists_to_one_text(id):
 
     start = time.time()
 
-    path0 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu0_uf.evt.gz"
-    path1 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu1_uf.evt.gz"
-    path2 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu2_uf.evt.gz"
-    path3 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu3_uf.evt.gz"
-    path4 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu4_uf.evt.gz"
-    path5 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu5_uf.evt.gz"
-    path6 = basepath + id + r"/xti/event_uf/ni" + id + r"_0mpu6_uf.evt.gz"
+    path0 = basepath + id + config_filenamePart0 + id + config_filenamePart1_0
+    path1 = basepath + id + config_filenamePart0 + id + config_filenamePart1_1
+    path2 = basepath + id + config_filenamePart0 + id + config_filenamePart1_2
+    path3 = basepath + id + config_filenamePart0 + id + config_filenamePart1_3
+    path4 = basepath + id + config_filenamePart0 + id + config_filenamePart1_4
+    path5 = basepath + id + config_filenamePart0 + id + config_filenamePart1_5
+    path6 = basepath + id + config_filenamePart0 + id + config_filenamePart1_6
 
     pathlist = [path0, path1, path2, path3, path4, path5, path6]
     for i in pathlist:
@@ -86,6 +88,6 @@ def run():
 
 
 if __name__ == '__main__':
-    id = '1010010112'
+    id = '*'
     save_id_fists_to_one_text(id)
     # run()
