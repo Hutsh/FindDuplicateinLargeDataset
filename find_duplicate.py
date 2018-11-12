@@ -2,75 +2,46 @@ from collections import Counter
 import multiprocessing as mp
 import glob, re, os, time
 from collections import defaultdict
+from queue import Queue
 
-
-
-def get_sep_list():
-    return glob.glob("./workingdata/sep*")
-
-def find(start):
-    d = []
-    sepfileList = get_sep_list()
-    for name in sepfileList:
-        with open(name, 'r') as f:
-            cnt = Counter(f.readlines())
-            d.extend([(k,v) for k, v in cnt.items() if v > 1])
-            # d.extend(Counter(f.readlines()).most_common(10))
-    # print(d)
-    return d
+def find_task(filelist): 
+    res = [] # store result of this part
+    for path in filelist:
+        with open(path, 'r') as f:
+            count = Counter(f.readlines())
+            res.extend([(k,v) for k, v in count.items() if v > 1]) # choice item appears more than once
+    return res
 
 def start_find_dup():
-    t = time.time()
+    #########################
+    total_files = 512
+    file_each_process = 64
+    file_list = glob.glob("./workingdata2/sep*") # (total_files) file path
+    #########################
 
-    # 利用Manager传递变量
-    # p = mp.Pool(16)
-    # manager = mp.Manager()
-    # d = manager.list()
-    # for i in range(0, 2 ** 10, 2 ** 4):
-    #     p.apply_async(find, args=(i,d))
-    # p.close()
-    # p.join()
+    start_time = time.time()
 
-    # 获取进程的返回值
-    res = []
-    d = []
-    p = mp.Pool()
-    for i in range(0, 2 ** 10, 2 ** 6):   # 每个进程处理64个文件
-        res.append(p.apply_async(find, args=(i,)))
-    p.close()
-    p.join()
-    for r in res:
-        d.extend(r.get())
-    # print(Counter(dict(d)).most_common(10))
-    print("\tFinish finding duplicates in", time.time() - t, "s")
-    return d
+    pool = mp.Pool()
+    results = []
+    
+    for i in range(0, total_files, file_each_process): # i is the start of each process
+        f_list = file_list[i:i + file_each_process]
+        results.append(pool.apply_async(find_task,(f_list,))) # calculate and put in pool
+        #
+    pool.close()    
+    pool.join() # wait finish
 
-def get_dup_time_list():
-    d = start_find_dup()
-    uniqueTime = set([t.strip() for t,p in d])
-    return uniqueTime
+    all_results = []
+    for res in results:
+        part_res = res.get()
+        if len(part_res) > 0:
+            all_results.extend(part_res)
 
-def get_dup_info():
-    duplist = get_dup_time_list()
-    textfile = glob.glob("./text/*.txt")[0]
-    dupinfo = []
+    end_time = time.time()
+    print("\tFinish finding in %f seconds" % (end_time - start_time) )
 
-
-    with open(textfile,"r") as f:
-        for ln in f:
-            cut = ln[2:16]
-            if cut in duplist:
-                dupinfo.append(ln.strip().split())
-    # dupinfo.sort(key=lambda x: x[0])
-
-    # for dupid in
-    td = defaultdict(list)
-    for time,p in dupinfo:
-        td[time].append(p)
-        # print("t:",time, " p:",p)
-
-    # print(td)
-    return td
+    print(all_results)
+    return all_results
 
 def save_result(dictionary):
     if not os.path.exists('result'):
@@ -87,8 +58,7 @@ def save_result(dictionary):
 
 
 if __name__ == '__main__':
-    ut = get_dup_info()
-    save_result(ut)
 
+    start_find_dup()
 
 
