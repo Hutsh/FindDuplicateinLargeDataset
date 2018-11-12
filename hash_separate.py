@@ -7,54 +7,66 @@ from concurrent.futures import ThreadPoolExecutor  #导出线程池
 from multiprocessing.pool import ThreadPool        #导出线程池
 q = queue.Queue()
 
-# 线程池
 def thread_pool():
     while True:
         t, args = q.get()
         t(*args)
         q.task_done()
 
-# 专门写文件
-def task(f, lines, lock):
-    # with lock:
+def write_file_task(f, lines, lock): # write file with lock
     f.writelines(lines)
 
-def start_sep(idn, npart):
-    start = time.time()	
+def line_to_int(line): 
+    # define a function to get hashable part of a line
+    # return the unique int part 
+    # "1.16736489906023e+08"  
+
+    # MUST RETURN AN INT 
+    # return int(line[2:16])
+    return int(line)
+
+def start_sep(npart):
+    ########################
+    output_file_path = r'workingdata2' # folder where store seprated texts
+    origion_file = r'workingdata2/number.txt' # file that need to find duplicates
+    ########################
+    start_time = time.time()    
+
     if not os.path.exists('data'):
         os.mkdir('data')
 
-    # 自建线程池
-    for i in range(64):
+    for i in range(64): # cread threads
         t = threading.Thread(target=thread_pool)
         t.daemon = True
         t.start()
 
-    # 保存所有子文件指针
-    fd = {}
+    fd = {} # store output file pointers
     for i in range(npart):
-        fd[i] = open('workingdata/sep_' + str(i) + '.txt', 'w')
+        fd[i] = open(output_file_path + '/sep_' + str(i) + '.txt', 'w')
 
     lock = threading.Lock()
-    with open('text/' + str(idn) + '.txt', 'r') as f:
-        fv = defaultdict(list)
+    with open(origion_file, 'r') as f:
+        fv = defaultdict(list) # dictionary of lists
         for line in f:
-            line = line[2:16] +'\n'
-            k = int(line) % npart # "1.16736489906023e+08 7 5"   
+            k = line_to_int(line) % npart # hash
             fv[k].append(line)
-            if len(fv[k]) >= int(npart/100):      # 如果一个键值长度超过1000，则写入文件
-                q.put((task, (fd[k], fv[k].copy(), lock)))
+            if len(fv[k]) >= 1000:      # write when more than 1000 lines
+                q.put((write_file_task, (fd[k], fv[k].copy(), lock)))
                 fv[k].clear()
     q.join()
-    # 所有队列完成后，还有部分字符长度少于1000的没有写入
-    for k, f in fd.items():
+    
+    for k, f in fd.items(): # write the rest of lines
         f.writelines(fv[k])
-    for i in range(npart):
+
+    for i in range(npart): # close pointers
         fd[i].close()
 
-    print("\tSeparate " + str(idn) + ".txt in ", time.time() - start, "s")
+    end_time = time.time()  
+
+    print("\tFinish separate in %f seconds" % (end_time - start_time) )
 
 
 
 if __name__ == '__main__':
-	start_sep(1010010112, 512)
+    start_sep(512)
+    #print('start')
