@@ -38,7 +38,7 @@ def save_time_in_txt(fitsFilePath):
     del rawy
 
     # np.savetxt("text/" + filename + ".txt", cated)
-    np.savetxt("text/" + filename + ".txt", cated, fmt='%.14e %d%d') #分辨率40ns 但是数据只到小数点后6位（116736489.906023）
+    np.savetxt("text/" + filename + ".txt", cated, fmt='%.6f %d%d') #分辨率40ns 但是数据只到小数点后6位（116736489.906023）
 
 def one_id_find_same_time(id): ##main
     path0 = basepath + id + config_filenamePart0 + id + config_filenamePart1_0
@@ -88,6 +88,6 @@ def run():
 
 
 if __name__ == '__main__':
-    id = '*'
+    id = '1010010112'
     save_id_fists_to_one_text(id)
     # run()
